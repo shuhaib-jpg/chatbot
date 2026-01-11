@@ -10,53 +10,53 @@ from botbuilder.core import (
 )
 from botbuilder.schema import Activity, ActivityTypes
 
+
 # =========================================================
 # CONFIGURATION (ENV VARIABLES)
 # =========================================================
-
 APP_ID = os.getenv("MicrosoftAppId", "")
 APP_PASSWORD = os.getenv("MicrosoftAppPassword", "")
-APP_TENANT_ID = os.getenv("MicrosoftAppTenantId", "")  # Add this line
-PORT = int(os.getenv("PORT", 8000))
+PORT = int(os.getenv("PORT", "8000"))
+
 
 # =========================================================
 # ADAPTER SETUP
+# NOTE: botbuilder-core (4.17.x) BotFrameworkAdapterSettings
+# DOES NOT accept tenant_id. So we only pass app_id + app_password.
 # =========================================================
-
-settings = BotFrameworkAdapterSettings(
-    app_id=APP_ID,
-    app_password=APP_PASSWORD,
-    tenant_id=APP_TENANT_ID
-)
-
+settings = BotFrameworkAdapterSettings(APP_ID, APP_PASSWORD)
 adapter = BotFrameworkAdapter(settings)
+
 
 # =========================================================
 # ERROR HANDLER
 # =========================================================
-
 async def on_error(context: TurnContext, error: Exception):
     print("❌ [on_turn_error]", error, file=sys.stderr)
     traceback.print_exc()
 
-    await context.send_activity(
-        "Sorry 😕, something went wrong on the bot."
-    )
+    # Try to notify the user (won't always succeed if auth failed)
+    try:
+        await context.send_activity("Sorry 😕, something went wrong on the bot.")
+    except Exception:
+        pass
+
 
 adapter.on_turn_error = on_error
+
 
 # =========================================================
 # BOT LOGIC
 # =========================================================
-
 async def on_message_activity(turn_context: TurnContext):
-    user_message = (turn_context.activity.text or "").lower()
+    user_message = (turn_context.activity.text or "").strip()
+    lower_msg = user_message.lower()
 
     print(f"📩 User message: {user_message}")
 
-    if "hello" in user_message or "hi" in user_message:
+    if any(x in lower_msg for x in ["hello", "hi", "hey"]):
         response = "Hello! 👋 How can I help you today?"
-    elif "help" in user_message:
+    elif "help" in lower_msg:
         response = (
             "I'm here to help 🤖\n\n"
             "Try typing:\n"
@@ -64,12 +64,12 @@ async def on_message_activity(turn_context: TurnContext):
             "- name\n"
             "- bye"
         )
-    elif "name" in user_message:
+    elif "name" in lower_msg:
         response = "I'm your Microsoft Teams Chatbot 🤖"
-    elif "bye" in user_message:
+    elif "bye" in lower_msg:
         response = "Goodbye! 👋 Have a great day!"
     else:
-        response = f"You said: '{turn_context.activity.text}'"
+        response = f"You said: '{user_message}'"
 
     await turn_context.send_activity(response)
 
@@ -86,18 +86,16 @@ async def bot_logic(turn_context: TurnContext):
                         "Welcome! 👋 Type `help` to get started."
                     )
 
-# =========================================================
-# HTTP ENDPOINT
-# =========================================================
 
+# =========================================================
+# HTTP ENDPOINTS
+# =========================================================
 async def messages(req: web.Request) -> web.Response:
     print("🔔 Incoming request: /api/messages")
 
+    # Bot Framework sends JSON payloads
     if "application/json" not in req.headers.get("Content-Type", ""):
-        return web.Response(
-            status=415,
-            text="Content-Type must be application/json"
-        )
+        return web.Response(status=415, text="Content-Type must be application/json")
 
     try:
         body = await req.json()
@@ -118,17 +116,18 @@ async def messages(req: web.Request) -> web.Response:
 async def health(req: web.Request) -> web.Response:
     return web.Response(text="🤖 Bot is running!", status=200)
 
+
 # =========================================================
 # APP STARTUP
 # =========================================================
-
 app = web.Application()
 app.router.add_post("/api/messages", messages)
 app.router.add_get("/", health)
 
+
 if __name__ == "__main__":
     print("=" * 60)
-    print("🚀 Starting Teams Chatbot")
+    print("🚀 Starting Teams Chatbot (aiohttp + botbuilder)")
     print(f"🌐 Listening on port {PORT}")
     print("📨 Endpoint: /api/messages")
     print("🔐 Authentication:", "ENABLED" if APP_ID else "DISABLED (local)")
