@@ -8,15 +8,14 @@ from botbuilder.core import (
     TurnContext,
 )
 from botbuilder.schema import Activity, ActivityTypes
-from config import Config
 
 # =========================================================
-# CONFIGURATION (from environment variables)
+# HARDCODED CONFIGURATION
 # =========================================================
-APP_ID = Config.APP_ID
-APP_PASSWORD = Config.APP_PASSWORD
-APP_TENANT_ID = Config.APP_TENANT_ID
-PORT = Config.PORT
+APP_ID = "2c5c8d8e-a088-4500-9d14-cc2f85686fe4"
+APP_PASSWORD = "3Cx8Q~-UQFnYMr6~PmWLNvIP9~RlKNRPvOh6XcjX"
+APP_TENANT_ID = "fbf64400-9783-4a58-8894-9f97bcf82b47"
+PORT = 8000
 
 # =========================================================
 # ADAPTER SETUP
@@ -114,8 +113,6 @@ if __name__ == "__main__":
     print("🚀 Starting Teams Chatbot (aiohttp + botbuilder)")
     print(f"🌐 Listening on port {PORT}")
     print("📨 Endpoint: /api/messages")
-    print("🔐 Authentication:", "ENABLED" if Config.is_production() else "DISABLED (local)")
-    if Config.is_production():
-        print(f"🔐 App ID: {APP_ID[:8]}...")
+    print(f"🔐 App ID: {APP_ID[:8]}...")
     print("=" * 60)
     web.run_app(app, host="0.0.0.0", port=PORT)
