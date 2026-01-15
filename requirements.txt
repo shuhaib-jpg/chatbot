@@ -1,3 +1,8 @@
+# Async HTTP client library
 aiohttp>=3.8.0
+
+# Core Bot Framework SDK
 botbuilder-core>=4.14.0
+
+# Bot Framework schema definitions
 botbuilder-schema>=4.14.0

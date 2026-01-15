@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/8adbea8e-9d73-4e84-85f7-e7265cc6b530/resourceGroups/hr-bot-rg/providers/Microsoft.Web/sites/zhhrbot001",
+    "appService.deploySubpath": "."
+}
