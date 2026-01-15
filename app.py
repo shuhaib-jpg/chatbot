@@ -10,12 +10,12 @@ from botbuilder.core import (
 from botbuilder.schema import Activity, ActivityTypes
 
 # =========================================================
-# HARDCODED CONFIGURATION
+# CONFIGURATION (from environment variables)
 # =========================================================
-APP_ID = "2c5c8d8e-a088-4500-9d14-cc2f85686fe4"
-APP_PASSWORD = "3Cx8Q~-UQFnYMr6~PmWLNvIP9~RlKNRPvOh6XcjX"
-APP_TENANT_ID = "fbf64400-9783-4a58-8894-9f97bcf82b47"
-PORT = 8000
+APP_ID = os.environ.get("MicrosoftAppId", "")
+APP_PASSWORD = os.environ.get("MicrosoftAppPassword", "")
+APP_TENANT_ID = os.environ.get("MicrosoftAppTenantId", "")
+PORT = int(os.environ.get("PORT", 8000))
 
 # =========================================================
 # ADAPTER SETUP
@@ -113,6 +113,6 @@ if __name__ == "__main__":
     print("🚀 Starting Teams Chatbot (aiohttp + botbuilder)")
     print(f"🌐 Listening on port {PORT}")
     print("📨 Endpoint: /api/messages")
-    print(f"🔐 App ID: {APP_ID[:8]}...")
+    print(f"🔐 App ID: {APP_ID[:8] if APP_ID else 'NOT SET'}...")
     print("=" * 60)
     web.run_app(app, host="0.0.0.0", port=PORT)
